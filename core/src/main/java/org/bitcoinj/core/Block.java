@@ -40,7 +40,7 @@ import static org.bitcoinj.core.Sha256Hash.*;
  *
  * <p>To get a block, you can either build one from the raw bytes you can get from another implementation, or request one
  * specifically using {@link Peer#getBlock(Sha256Hash)}, or grab one from a downloaded {@link BlockChain}.</p>
- * 
+ *
  * <p>Instances of this class are not safe for use by multiple threads.</p>
  */
 public class Block extends Message {
@@ -56,7 +56,7 @@ public class Block extends Message {
     private static final Logger log = LoggerFactory.getLogger(Block.class);
 
     /** How many bytes are required to represent a block header WITHOUT the trailing 00 length byte. */
-    public static final int HEADER_SIZE = 80;
+    public static final int HEADER_SIZE = 80 + 4 + 4;
 
     static final long ALLOWED_TIME_DRIFT = 2 * 60 * 60; // Same value as Bitcoin Core.
 
@@ -96,6 +96,8 @@ public class Block extends Message {
     private long time;
     private long difficultyTarget; // "nBits"
     private long nonce;
+    private long nStartLocation;
+    private long nFinalCalculation;
 
     // TODO: Get rid of all the direct accesses to this field. It's a long-since unnecessary holdover from the Dalvik days.
     /** If null, it means this object holds only the headers. */
@@ -106,7 +108,7 @@ public class Block extends Message {
 
     protected boolean headerBytesValid;
     protected boolean transactionBytesValid;
-    
+
     // Blocks can be encoded in a way that will use more bytes than is optimal (due to VarInts having multiple encodings)
     // MAX_BLOCK_SIZE must be compared to the optimal encoding, not the actual encoding, so when parsing, we keep track
     // of the size of the ideal encoding in addition to the actual message size (which Message needs)
@@ -190,10 +192,12 @@ public class Block extends Message {
      * @param time UNIX time when the block was mined.
      * @param difficultyTarget Number which this block hashes lower than.
      * @param nonce Arbitrary number to make the block hash lower than the target.
+     * @param nStartLocation
+     * @param nFinalCalculation
      * @param transactions List of transactions including the coinbase.
      */
     public Block(NetworkParameters params, long version, Sha256Hash prevBlockHash, Sha256Hash merkleRoot, long time,
-                 long difficultyTarget, long nonce, List<Transaction> transactions) {
+                 long difficultyTarget, long nonce, long nStartLocation, long nFinalCalculation, List<Transaction> transactions) {
         super(params);
         this.version = version;
         this.prevBlockHash = prevBlockHash;
@@ -201,6 +205,8 @@ public class Block extends Message {
         this.time = time;
         this.difficultyTarget = difficultyTarget;
         this.nonce = nonce;
+        this.nStartLocation = nStartLocation;
+        this.nFinalCalculation = nFinalCalculation;
         this.transactions = new LinkedList<Transaction>();
         this.transactions.addAll(transactions);
     }
@@ -216,12 +222,13 @@ public class Block extends Message {
      * </p>
      */
     public Coin getBlockInflation(int height) {
-        return FIFTY_COINS.shiftRight(height / params.getSubsidyDecreaseBlockCount());
+        if (height == 1) return COIN.times(9604959);
+        return COIN.times(1);
     }
 
     /**
      * Parse transactions from the block.
-     * 
+     *
      * @param transactionsOffset Offset of the transactions within the block.
      * Useful for non-Bitcoin chains where the block header may not be a fixed
      * size.
@@ -259,6 +266,8 @@ public class Block extends Message {
         time = readUint32();
         difficultyTarget = readUint32();
         nonce = readUint32();
+        nStartLocation = readUint32();
+        nFinalCalculation = readUint32();
         hash = Sha256Hash.wrapReversed(Sha256Hash.hashTwice(payload, offset, cursor - offset));
         headerBytesValid = serializer.isParseRetainMode();
 
@@ -266,7 +275,7 @@ public class Block extends Message {
         parseTransactions(offset + HEADER_SIZE);
         length = cursor - offset;
     }
-    
+
     public int getOptimalEncodingMessageSize() {
         if (optimalEncodingMessageSize != 0)
             return optimalEncodingMessageSize;
@@ -288,6 +297,8 @@ public class Block extends Message {
         Utils.uint32ToByteStreamLE(time, stream);
         Utils.uint32ToByteStreamLE(difficultyTarget, stream);
         Utils.uint32ToByteStreamLE(nonce, stream);
+        Utils.uint32ToByteStreamLE(nStartLocation, stream);
+        Utils.uint32ToByteStreamLE(nFinalCalculation, stream);
     }
 
     private void writeTransactions(OutputStream stream) throws IOException {
@@ -466,6 +477,8 @@ public class Block extends Message {
         block.version = version;
         block.time = time;
         block.difficultyTarget = difficultyTarget;
+        block.nStartLocation = nStartLocation;
+        block.nFinalCalculation = nFinalCalculation;
         block.transactions = null;
         block.hash = getHash();
     }
@@ -479,12 +492,7 @@ public class Block extends Message {
         StringBuilder s = new StringBuilder();
         s.append(" block: \n");
         s.append("   hash: ").append(getHashAsString()).append('\n');
-        s.append("   version: ").append(version);
-        String bips = Joiner.on(", ").skipNulls().join(isBIP34() ? "BIP34" : null, isBIP66() ? "BIP66" : null,
-                isBIP65() ? "BIP65" : null);
-        if (!bips.isEmpty())
-            s.append(" (").append(bips).append(')');
-        s.append('\n');
+        s.append("   version: ").append(version).append('\n');
         s.append("   previous block: ").append(getPrevBlockHash()).append("\n");
         s.append("   merkle root: ").append(getMerkleRoot()).append("\n");
         s.append("   time: ").append(time).append(" (").append(Utils.dateTimeFormat(time * 1000)).append(")\n");
@@ -527,7 +535,7 @@ public class Block extends Message {
      */
     public BigInteger getDifficultyTargetAsInteger() throws VerificationException {
         BigInteger target = Utils.decodeCompactBits(difficultyTarget);
-        if (target.signum() <= 0 || target.compareTo(params.maxTarget) > 0)
+        if ((target.signum() <= 0 || target.compareTo(params.getMaxTarget()) > 0) && version == 4) // exclude genesis
             throw new VerificationException("Difficulty target is bad: " + target.toString());
         return target;
     }
@@ -848,6 +856,34 @@ public class Block extends Message {
         this.hash = null;
     }
 
+    /**
+     * Returns the start location.
+     */
+    public long getStartLocation() {
+        return nStartLocation;
+    }
+
+    /** Sets the start location and clears any cached data. */
+    public void setStartLocation(long startLocation) {
+        unCacheHeader();
+        this.nStartLocation = startLocation;
+        this.hash = null;
+    }
+
+    /**
+     * Returns the final calculation.
+     */
+    public long getFinalCaclucation() {
+        return nFinalCalculation;
+    }
+
+    /** Sets the final calculation and clears any cached data. */
+    public void setFinalCaclucation(long calculations) {
+        unCacheHeader();
+        this.nFinalCalculation = calculations;
+        this.hash = null;
+    }
+
     /** Returns an immutable list of transactions held in this block, or null if this object represents just a header. */
     @Nullable
     public List<Transaction> getTransactions() {
@@ -861,7 +897,7 @@ public class Block extends Message {
     private static int txCounter;
 
     /** Adds a coinbase transaction to the block. This exists for unit tests.
-     * 
+     *
      * @param height block height, if known, or -1 otherwise.
      */
     @VisibleForTesting
@@ -907,7 +943,7 @@ public class Block extends Message {
     /**
      * Returns a solved block that builds on top of this one. This exists for unit tests.
      * In this variant you can specify a public key (pubkey) for use in generating coinbase blocks.
-     * 
+     *
      * @param height block height, if known, or -1 otherwise.
      */
     Block createNextBlock(@Nullable final Address to, final long version,
@@ -1000,35 +1036,11 @@ public class Block extends Message {
 
     /**
      * Return whether this block contains any transactions.
-     * 
+     *
      * @return  true if the block contains transactions, false otherwise (is
      * purely a header).
      */
     public boolean hasTransactions() {
         return !this.transactions.isEmpty();
-    }
-
-    /**
-     * Returns whether this block conforms to
-     * <a href="https://github.com/bitcoin/bips/blob/master/bip-0034.mediawiki">BIP34: Height in Coinbase</a>.
-     */
-    public boolean isBIP34() {
-        return version >= BLOCK_VERSION_BIP34;
-    }
-
-    /**
-     * Returns whether this block conforms to
-     * <a href="https://github.com/bitcoin/bips/blob/master/bip-0066.mediawiki">BIP66: Strict DER signatures</a>.
-     */
-    public boolean isBIP66() {
-        return version >= BLOCK_VERSION_BIP66;
-    }
-
-    /**
-     * Returns whether this block conforms to
-     * <a href="https://github.com/bitcoin/bips/blob/master/bip-0065.mediawiki">BIP65: OP_CHECKLOCKTIMEVERIFY</a>.
-     */
-    public boolean isBIP65() {
-        return version >= BLOCK_VERSION_BIP65;
     }
 }

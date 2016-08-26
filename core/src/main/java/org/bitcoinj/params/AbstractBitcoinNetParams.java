@@ -59,12 +59,12 @@ public abstract class AbstractBitcoinNetParams extends NetworkParameters {
     @Override
     public void checkDifficultyTransitions(final StoredBlock storedPrev, final Block nextBlock,
     	final BlockStore blockStore) throws VerificationException, BlockStoreException {
-          final long      	BlocksTargetSpacing			= 5 * 60;
-          int         		TimeDaySeconds				= 60 * 60 * 24;
-          long				PastSecondsMin				= TimeDaySeconds / 40;
-          long				PastSecondsMax				= TimeDaySeconds * 7;
-          long				PastBlocksMin				= PastSecondsMin / BlocksTargetSpacing;   //? blocks
-          long				PastBlocksMax				= PastSecondsMax / BlocksTargetSpacing;   //? blocks
+          final long BlocksTargetSpacing = 5 * 60;
+          long TimeDaySeconds = 60 * 60 * 24;
+          long PastSecondsMin = TimeDaySeconds / 40;
+          long PastSecondsMax = TimeDaySeconds * 7;
+          long PastBlocksMin = PastSecondsMin / BlocksTargetSpacing;
+          long PastBlocksMax = PastSecondsMax / BlocksTargetSpacing;
 
           DUAL_KGW3(storedPrev, nextBlock, BlocksTargetSpacing, PastBlocksMin, PastBlocksMax, blockStore);
     }
@@ -96,7 +96,6 @@ public abstract class AbstractBitcoinNetParams extends NetworkParameters {
 
         if (BlockLastSolved == null || BlockLastSolved.getHeight() == 0 || (long)BlockLastSolved.getHeight() < PastBlocksMin) {
             verifyDifficulty(this.getMaxTarget(), storedPrev, nextBlock);
-
         } else {
 
             for (int i = 1; BlockReading != null && BlockReading.getHeight() > 0; i++) {
@@ -132,9 +131,8 @@ public abstract class AbstractBitcoinNetParams extends NetworkParameters {
 
                 StoredBlock BlockReadingPrev = blockStore.get(BlockReading.getHeader().getPrevBlockHash());
                 if (BlockReadingPrev == null)
-                {
                     break;
-                }
+
                 BlockReading = BlockReadingPrev;
             }
 
@@ -148,9 +146,9 @@ public abstract class AbstractBitcoinNetParams extends NetworkParameters {
                 kgw_dual1 = kgw_dual1.and(MASK256BIT);
             }
 
-            if (kgw_dual1.compareTo(this.getMaxTarget()) > 0) {
+            if (kgw_dual1.compareTo(bnPowLimit) > 0) {
                 log.info("Difficulty hit proof of work limit: {}", kgw_dual1.toString(16));
-                kgw_dual1 = this.getMaxTarget();
+                kgw_dual1 = bnPowLimit;
             }
 
             StoredBlock BlockPrev = blockStore.get(storedPrev.getHeader().getPrevBlockHash());
@@ -168,7 +166,7 @@ public abstract class AbstractBitcoinNetParams extends NetworkParameters {
             if (nActualTime1 > Blocktime * 3)
                 nActualTime1 = Blocktime * 3;
 
-            kgw_dual2 = kgw_dual2.multiply(BigInteger.valueOf(nActualTime1).abs());
+            kgw_dual2 = kgw_dual2.multiply(BigInteger.valueOf(nActualTime1));
             kgw_dual2 = kgw_dual2.and(MASK256BIT);
             kgw_dual2 = kgw_dual2.divide(BigInteger.valueOf(Blocktime));
             kgw_dual2 = kgw_dual2.and(MASK256BIT);
@@ -197,6 +195,12 @@ public abstract class AbstractBitcoinNetParams extends NetworkParameters {
 
     private void verifyDifficulty(BigInteger newDifficulty, StoredBlock storedPrev, Block nextBlock) {
         BigInteger receivedDifficulty = nextBlock.getDifficultyTargetAsInteger();
+
+        // The calculated difficulty is to a higher precision than received, so reduce here.
+        int accuracyBytes = (int) (nextBlock.getDifficultyTarget() >>> 24) - 3;
+        BigInteger mask = BigInteger.valueOf(0xFFFFFFL).shiftLeft(accuracyBytes * 8);
+        newDifficulty = newDifficulty.and(mask);
+
         if (newDifficulty.compareTo(receivedDifficulty) != 0)
             throw new VerificationException("Network provided difficulty bits do not match what was calculated: " +
                     newDifficulty.toString() + " vs " + receivedDifficulty.toString());

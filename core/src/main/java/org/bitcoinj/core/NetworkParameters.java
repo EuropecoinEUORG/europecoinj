@@ -508,15 +508,8 @@ public abstract class NetworkParameters {
     public EnumSet<Script.VerifyFlag> getTransactionVerificationFlags(final Block block,
             final Transaction transaction, final VersionTally tally, final Integer height) {
         final EnumSet<Script.VerifyFlag> verifyFlags = EnumSet.noneOf(Script.VerifyFlag.class);
-        if (block.getTimeSeconds() >= NetworkParameters.BIP16_ENFORCE_TIME)
-            verifyFlags.add(Script.VerifyFlag.P2SH);
-
-        // Start enforcing CHECKLOCKTIMEVERIFY, (BIP65) for block.nVersion=4
-        // blocks, when 75% of the network has upgraded:
-        if (block.getVersion() >= Block.BLOCK_VERSION_BIP65 &&
-            tally.getCountAtOrAbove(Block.BLOCK_VERSION_BIP65) > this.getMajorityEnforceBlockUpgrade()) {
-            verifyFlags.add(Script.VerifyFlag.CHECKLOCKTIMEVERIFY);
-        }
+        verifyFlags.add(Script.VerifyFlag.P2SH);
+        verifyFlags.add(Script.VerifyFlag.CHECKLOCKTIMEVERIFY);
 
         return verifyFlags;
     }

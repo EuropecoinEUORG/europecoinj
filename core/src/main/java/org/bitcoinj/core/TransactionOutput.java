@@ -24,6 +24,7 @@ import org.slf4j.*;
 
 import javax.annotation.*;
 import java.io.*;
+import java.math.*;
 import java.util.*;
 
 import static com.google.common.base.Preconditions.*;
@@ -31,7 +32,7 @@ import static com.google.common.base.Preconditions.*;
 /**
  * <p>A TransactionOutput message contains a scriptPubKey that controls who is able to spend its value. It is a sub-part
  * of the Transaction message.</p>
- * 
+ *
  * <p>Instances of this class are not safe for use by multiple threads.</p>
  */
 public class TransactionOutput extends ChildMessage {
@@ -182,6 +183,10 @@ public class TransactionOutput extends ChildMessage {
         } catch (IllegalArgumentException e) {
             throw new IllegalStateException(e.getMessage(), e);
         }
+    }
+
+    public Coin getValueWithInterest(int outputBlockHeight, int valuationHeight) {
+        return InterestRateTable.get().GetInterest(Coin.valueOf(value), outputBlockHeight, valuationHeight, scriptPubKey.GetTermDepositReleaseBlock());
     }
 
     /**

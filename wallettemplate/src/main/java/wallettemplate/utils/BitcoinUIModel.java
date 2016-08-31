@@ -1,6 +1,6 @@
 /*
  * Copyright by the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,6 +26,7 @@ import javafx.beans.property.ReadOnlyDoubleProperty;
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.collections.*;
 
 import java.util.Date;
 
@@ -37,6 +38,7 @@ public class BitcoinUIModel {
     private SimpleObjectProperty<Coin> balance = new SimpleObjectProperty<>(Coin.ZERO);
     private SimpleDoubleProperty syncProgress = new SimpleDoubleProperty(-1);
     private ProgressBarUpdater syncProgressUpdater = new ProgressBarUpdater();
+    private ObservableList<Transaction> depositTransactions = FXCollections.observableArrayList();
 
     public BitcoinUIModel() {
     }
@@ -58,6 +60,7 @@ public class BitcoinUIModel {
     private void update(Wallet wallet) {
         balance.set(wallet.getBalance());
         address.set(wallet.currentReceiveAddress());
+        depositTransactions.addAll(wallet.getTermDepositTransactions());
     }
 
     private class ProgressBarUpdater extends DownloadProgressTracker {
@@ -84,5 +87,9 @@ public class BitcoinUIModel {
 
     public ReadOnlyObjectProperty<Coin> balanceProperty() {
         return balance;
+    }
+
+    public ObservableList<Transaction> getTermDepositTransactions() {
+        return depositTransactions;
     }
 }

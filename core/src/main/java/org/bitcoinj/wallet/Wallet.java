@@ -2896,6 +2896,24 @@ public class Wallet extends BaseTaggableObject
     }
 
     /**
+     * Returns all non-dead, active term deposit transactions.
+     */
+    public List<Transaction> getTermDepositTransactions() {
+        List<Transaction> transactions = getTransactionsByTime();
+        List<Transaction> result = new ArrayList<Transaction>();
+        for (Transaction tx : transactions) {
+            for (TransactionOutput output : tx.getOutputs()) {
+                if (output.getScriptPubKey().IsTermDeposit()) {
+                    result.add(tx);
+                    break;
+                }
+            }
+
+        }
+        return result;
+    }
+
+    /**
      * Returns all non-dead, active transactions ordered by recency.
      */
     public List<Transaction> getTransactionsByTime() {

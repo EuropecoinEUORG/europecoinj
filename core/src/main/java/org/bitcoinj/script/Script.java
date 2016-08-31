@@ -751,6 +751,10 @@ public class Script {
         return castToBigInteger(chunks.get(0).data, 5).intValue();
     }
 
+    public byte[] GetTermDepositPubkeyHash() {
+        return chunks.get(5).data;
+    }
+
     private static boolean equalsRange(byte[] a, int start, byte[] b) {
         if (start + b.length > a.length)
             return false;

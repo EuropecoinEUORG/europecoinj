@@ -46,7 +46,7 @@ import org.bitcoinj.core.Monetary;
 public final class MonetaryFormat {
 
     /** Standard format for the BTC denomination. */
-    public static final MonetaryFormat BTC = new MonetaryFormat().shift(0).minDecimals(4); //minDecimals(2).repeatOptionalDecimals(2, 3);
+    public static final MonetaryFormat BTC = new MonetaryFormat().shift(0).minDecimals(8); //minDecimals(2).repeatOptionalDecimals(2, 3);
     /** Standard format for the mBTC denomination. */
     public static final MonetaryFormat MBTC = new MonetaryFormat().shift(3).minDecimals(2).optionalDecimals(2);
     /** Standard format for the µBTC denomination. */

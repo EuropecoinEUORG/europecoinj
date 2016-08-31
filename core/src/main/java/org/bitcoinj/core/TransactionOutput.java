@@ -330,6 +330,8 @@ public class TransactionOutput extends ChildMessage {
                 return transactionBag.isPubKeyMine(pubkey);
             } if (script.isPayToScriptHash()) {
                 return transactionBag.isPayToScriptHashMine(script.getPubKeyHash());
+            } if (script.IsTermDeposit()) {
+                return transactionBag.isPubKeyHashMine(script.GetTermDepositPubkeyHash());
             } else {
                 byte[] pubkeyHash = script.getPubKeyHash();
                 return transactionBag.isPubKeyHashMine(pubkeyHash);

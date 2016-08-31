@@ -21,13 +21,13 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>org.bitcoinj</groupId>
-        <artifactId>bitcoinj-parent</artifactId>
-        <version>0.15-SNAPSHOT</version>
+        <artifactId>europecoinj-parent</artifactId>
+        <version>0.15</version>
     </parent>
 
     <artifactId>wallettemplate</artifactId>
 
-    <name>bitcoinj Wallet-Template</name>
+    <name>europecoinj Wallet-Template</name>
 
     <build>
         <plugins>
@@ -73,7 +73,7 @@
     <dependencies>
         <dependency>
             <groupId>org.bitcoinj</groupId>
-            <artifactId>bitcoinj-core</artifactId>
+            <artifactId>europecoinj-core</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
         <dependency>

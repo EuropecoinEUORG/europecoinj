@@ -20,20 +20,20 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <groupId>org.bitcoinj</groupId>
-        <artifactId>bitcoinj-parent</artifactId>
-        <version>0.15-SNAPSHOT</version>
+        <artifactId>europecoinj-parent</artifactId>
+        <version>0.15</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>bitcoinj-examples</artifactId>
+    <artifactId>europecoinj-examples</artifactId>
 
-    <name>bitcoinj Examples</name>
-    <description>A collection of examples using the bitcoinj library</description>
+    <name>europecoinj Examples</name>
+    <description>A collection of examples using the europecoinj library</description>
 
     <dependencies>
         <dependency>
             <groupId>org.bitcoinj</groupId>
-            <artifactId>bitcoinj-core</artifactId>
+            <artifactId>europecoinj-core</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
         <dependency>

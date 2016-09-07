@@ -22,7 +22,7 @@
     <parent>
         <groupId>org.bitcoinj</groupId>
         <artifactId>europecoinj-parent</artifactId>
-        <version>0.15</version>
+        <version>1.0</version>
     </parent>
 
     <artifactId>europecoinj-core</artifactId>

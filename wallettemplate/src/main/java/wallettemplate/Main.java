@@ -39,6 +39,8 @@ import wallettemplate.utils.TextFieldValidator;
 import javax.annotation.Nullable;
 import java.io.File;
 import java.io.IOException;
+import java.io.FileNotFoundException;
+import java.io.FileInputStream;
 import java.net.URL;
 
 import static wallettemplate.utils.GuiUtils.*;
@@ -144,6 +146,12 @@ public class Main extends Application {
         bitcoin.setDownloadListener(controller.progressBarUpdater())
                .setBlockingStartup(false)
                .setUserAgent(APP_NAME, "1.0");
+        try {
+            final File checkpointsFile = new File("checkpoints.txt");
+            bitcoin.setCheckpoints(new FileInputStream(checkpointsFile));
+        } catch (FileNotFoundException e) {
+            System.out.println("Failed to load checkpoints file");
+        };
         if (seed != null)
             bitcoin.restoreWalletFromSeed(seed);
     }

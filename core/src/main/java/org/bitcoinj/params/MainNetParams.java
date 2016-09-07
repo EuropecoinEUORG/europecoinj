@@ -67,10 +67,17 @@ public class MainNetParams extends AbstractBitcoinNetParams {
         // transactions are handled. Duplicated transactions could occur in the case where a coinbase had the same
         // extraNonce and the same outputs but appeared at different heights, and greatly complicated re-org handling.
         // Having these here simplifies block connection logic considerably.
-        checkpoints.put(0,    Sha256Hash.wrap("000d0da26987ead011c5d568e627f7e3d4a4f83a0b280b1134d8e7e366377f9a"));
-        checkpoints.put(7614, Sha256Hash.wrap("0000004eb7ffab1324ac772ee5b70b86d32375c0ad309ed315283404f50a9a49"));
+        checkpoints.put(1,     Sha256Hash.wrap("003e216e51eade2b40e1cb56695543f8ee5f8d6a7c080b13ea2c33c02a27747a"));
+        checkpoints.put(3724,  Sha256Hash.wrap("000000561a9d683eb9e96e6aa0daeb796f09c3e6f734f88b745bb32d9b3ca84e"));
+        checkpoints.put(7614,  Sha256Hash.wrap("0000004eb7ffab1324ac772ee5b70b86d32375c0ad309ed315283404f50a9a49"));
+        checkpoints.put(10176, Sha256Hash.wrap("000000eac0ce8e159aff91f656f6aa75af624246b69db7860bee21d3055e1cdd"));
+        checkpoints.put(13104, Sha256Hash.wrap("000000727f3e125d4990effe146f749180419409a9a7388647139bb31a10368f"));
+        checkpoints.put(14726, Sha256Hash.wrap("00000000028e2165069b61452056157febe10437c47667bf6631b99721e9d4d7"));
 
-        addrSeeds = new int[] { 0x4b44d655 };
+        dnsSeeds = new String[] {
+            "85.214.68.75",
+            "37.120.190",
+        };
     }
 
     private static MainNetParams instance;

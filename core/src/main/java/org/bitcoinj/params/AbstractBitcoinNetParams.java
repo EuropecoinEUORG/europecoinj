@@ -129,9 +129,12 @@ public abstract class AbstractBitcoinNetParams extends NetworkParameters {
                     if ((PastRateAdjustmentRatio <= EventHorizonDeviationSlow) || (PastRateAdjustmentRatio >= EventHorizonDeviationFast))
                         break;
 
-                StoredBlock BlockReadingPrev = blockStore.get(BlockReading.getHeader().getPrevBlockHash());
-                if (BlockReadingPrev == null)
-                    break;
+                StoredBlock BlockReadingPrev = BlockReading.getPrev(blockStore);
+                if (BlockReadingPrev == null) {
+                    // Since we are using the checkpoint system, there may not be enough blocks to do this diff adjust, so skip until we do
+                    // break;
+                    return;
+                  }
 
                 BlockReading = BlockReadingPrev;
             }
@@ -151,7 +154,7 @@ public abstract class AbstractBitcoinNetParams extends NetworkParameters {
                 kgw_dual1 = bnPowLimit;
             }
 
-            StoredBlock BlockPrev = blockStore.get(storedPrev.getHeader().getPrevBlockHash());
+            StoredBlock BlockPrev = storedPrev.getPrev(blockStore);
           	long nActualTime1 = storedPrev.getHeader().getTimeSeconds() - BlockPrev.getHeader().getTimeSeconds();
 
             // hack caused bug in c implementation

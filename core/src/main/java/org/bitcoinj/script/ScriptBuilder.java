@@ -134,7 +134,7 @@ public class ScriptBuilder {
     /**
      * Adds the given number as a OP_N opcode to the end of the program.
      * Only handles values 0-16 inclusive.
-     * 
+     *
      * @see #number(int)
      */
     public ScriptBuilder smallNum(int num) {
@@ -145,7 +145,7 @@ public class ScriptBuilder {
      * This is intended to use for negative numbers or values > 16, and although
      * it will accept numbers in the range 0-16 inclusive, the encoding would be
      * considered non-standard.
-     * 
+     *
      * @see #number(int)
      */
     protected ScriptBuilder bigNum(long num) {
@@ -155,7 +155,7 @@ public class ScriptBuilder {
     /**
      * Adds the given number as a OP_N opcode to the given index in the program.
      * Only handles values 0-16 inclusive.
-     * 
+     *
      * @see #number(int)
      */
     public ScriptBuilder smallNum(int index, int num) {
@@ -169,7 +169,7 @@ public class ScriptBuilder {
      * This is intended to use for negative numbers or values > 16, and although
      * it will accept numbers in the range 0-16 inclusive, the encoding would be
      * considered non-standard.
-     * 
+     *
      * @see #number(int)
      */
     protected ScriptBuilder bigNum(int index, long num) {
@@ -238,6 +238,21 @@ public class ScriptBuilder {
     /** Creates a scriptPubKey that encodes payment to the given raw public key. */
     public static Script createOutputScript(ECKey key) {
         return new ScriptBuilder().data(key.getPubKey()).op(OP_CHECKSIG).build();
+    }
+
+    /** Creates a scriptPubKey that encodes term deposit to the given address. */
+    public static Script createTermDepositOutputScript(Address to, int releaseBlockNum) {
+        // <releaseBlockNum> OP_CHECKLOCKTIMEVERIFY OP_DROP OP_DUP OP_HASH160 <pubKeyHash> OP_EQUALVERIFY OP_CHECKSIG
+        return new ScriptBuilder()
+            .op(releaseBlockNum)
+            .op(OP_CHECKLOCKTIMEVERIFY)
+            .op(OP_DROP)
+            .op(OP_DUP)
+            .op(OP_HASH160)
+            .data(to.getHash160())
+            .op(OP_EQUALVERIFY)
+            .op(OP_CHECKSIG)
+            .build();
     }
 
     /**
@@ -315,7 +330,7 @@ public class ScriptBuilder {
     }
 
     /**
-     * Create a program that satisfies an OP_CHECKMULTISIG program, using pre-encoded signatures. 
+     * Create a program that satisfies an OP_CHECKMULTISIG program, using pre-encoded signatures.
      * Optionally, appends the script program bytes if spending a P2SH output.
      */
     public static Script createMultiSigInputScriptBytes(List<byte[]> signatures, @Nullable byte[] multisigProgramBytes) {

@@ -122,7 +122,9 @@ public abstract class NetworkParameters {
             //   "The Times 03/Jan/2009 Chancellor on brink of second bailout for banks"
             byte[] bytes = Utils.HEX.decode
                     ("04ffff001d01042a57484f204953204e4558542c204d617474686961732c20537465766520616e642043687269737469616e");
-            t.addInput(new TransactionInput(n, t, bytes));
+            TransactionInput txIn = new TransactionInput(n, t, bytes);
+            txIn.setSequenceNumber(0xFFFFFFFFL); // workaround sequence number problem: genesis tx is final
+            t.addInput(txIn);
 
             ByteArrayOutputStream scriptPubKeyBytes = new ByteArrayOutputStream();
             Script.writeBytes(scriptPubKeyBytes, Utils.HEX.decode

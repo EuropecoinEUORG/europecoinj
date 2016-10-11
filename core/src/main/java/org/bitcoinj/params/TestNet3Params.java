@@ -59,7 +59,9 @@ public class TestNet3Params extends AbstractBitcoinNetParams {
             genesisHash);
         alertSigningKey = Utils.HEX.decode("045244948ceada9a43a7a5d5f6c56306575a7adfcc07754aec34eea88026d7e7f0acd9089edaac9aa734db5a4eb1aee96b9cedb8260c4ecff4f7db25a5952487aa");
 
-        addrSeeds = new int[] { 0x4b44d655 };
+        dnsSeeds = new String[] {
+            "127.0.0.1"
+        };
         bip32HeaderPub = 0x043587CF;
         bip32HeaderPriv = 0x04358394;
 

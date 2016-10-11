@@ -271,6 +271,8 @@ public class Script {
             return chunks.get(2).data;
         else if (isPayToScriptHash())
             return chunks.get(1).data;
+        else if (isTermDeposit())
+            return chunks.get(5).data;
         else
             throw new ScriptException("Script not in the standard scriptPubKey form");
     }
@@ -358,7 +360,7 @@ public class Script {
      *            showing addresses rather than pubkeys.
      */
     public Address getToAddress(NetworkParameters params, boolean forcePayToPubKey) throws ScriptException {
-        if (isSentToAddress())
+        if (isSentToAddress() || isTermDeposit())
             return new Address(params, getPubKeyHash());
         else if (isPayToScriptHash())
             return Address.fromP2SHScript(params, this);
@@ -444,7 +446,7 @@ public class Script {
      * It is expected that this program later on will be updated with proper signatures.
      */
     public Script createEmptyInputScript(@Nullable ECKey key, @Nullable Script redeemScript) {
-        if (isSentToAddress()) {
+        if (isSentToAddress() || isTermDeposit()) {
             checkArgument(key != null, "Key required to create pay-to-address input script");
             return ScriptBuilder.createInputScript(null, key);
         } else if (isSentToRawPubKey()) {
@@ -468,7 +470,7 @@ public class Script {
             sigsSuffixCount = 1;
         } else if (isSentToMultiSig()) {
             sigsPrefixCount = 1; // OP_0 <sig>*
-        } else if (isSentToAddress()) {
+        } else if (isSentToAddress() || isTermDeposit()) {
             sigsSuffixCount = 1; // <sig> <pubkey>
         }
         return ScriptBuilder.updateScriptWithSignature(scriptSig, sigBytes, index, sigsPrefixCount, sigsSuffixCount);
@@ -633,7 +635,7 @@ public class Script {
             // for N of M CHECKMULTISIG script we will need N signatures to spend
             ScriptChunk nChunk = chunks.get(0);
             return Script.decodeFromOpN(nChunk.opcode);
-        } else if (isSentToAddress() || isSentToRawPubKey()) {
+        } else if (isSentToAddress() || isSentToRawPubKey() || isTermDeposit()) {
             // pay-to-address and pay-to-pubkey require single sig
             return 1;
         } else if (isPayToScriptHash()) {
@@ -658,7 +660,7 @@ public class Script {
         } else if (isSentToRawPubKey()) {
             // scriptSig: <sig>
             return SIG_SIZE;
-        } else if (isSentToAddress()) {
+        } else if (isSentToAddress() || isTermDeposit()) {
             // scriptSig: <sig> <pubkey>
             int uncompressedPubKeySize = 65;
             return SIG_SIZE + (pubKey != null ? pubKey.getPubKey().length : uncompressedPubKeySize);
@@ -733,26 +735,24 @@ public class Script {
         return true;
     }
 
-    public boolean IsTermDeposit() {
-        return GetTermDepositReleaseBlock() > -1;
-    }
-
-    public int GetTermDepositReleaseBlock() {
-        if (chunks.size() != 8) return -1;
+    public boolean isTermDeposit() {
+        if (chunks.size() != 8) return false;
         // Check that opcodes match the pre-determined format.
-        if (!chunks.get(1).equalsOpCode(OP_CHECKLOCKTIMEVERIFY)) return -1;
-        if (!chunks.get(2).equalsOpCode(OP_DROP)) return -1;
-        if (!chunks.get(3).equalsOpCode(OP_DUP)) return -1;
-        if (!chunks.get(4).equalsOpCode(OP_HASH160)) return -1;
-        // if (!chunks.get(5).equalsOpCode(OP_PUBKEYHASH)) return -1;
-        if (!chunks.get(6).equalsOpCode(OP_EQUALVERIFY)) return -1;
-        if (!chunks.get(7).equalsOpCode(OP_CHECKSIG)) return -1;
-
-        return castToBigInteger(chunks.get(0).data, 5).intValue();
+        if (!chunks.get(1).equalsOpCode(OP_CHECKLOCKTIMEVERIFY)) return false;
+        if (!chunks.get(2).equalsOpCode(OP_DROP)) return false;
+        if (!chunks.get(3).equalsOpCode(OP_DUP)) return false;
+        if (!chunks.get(4).equalsOpCode(OP_HASH160)) return false;
+        // chunks[5] = pubkey
+        if (!chunks.get(6).equalsOpCode(OP_EQUALVERIFY)) return false;
+        if (!chunks.get(7).equalsOpCode(OP_CHECKSIG)) return false;
+        return true;
     }
 
-    public byte[] GetTermDepositPubkeyHash() {
-        return chunks.get(5).data;
+    public int getTermDepositReleaseBlock() {
+        if (isTermDeposit())
+            return castToBigInteger(chunks.get(0).data, 5).intValue();
+        else
+            return -1;
     }
 
     private static boolean equalsRange(byte[] a, int start, byte[] b) {

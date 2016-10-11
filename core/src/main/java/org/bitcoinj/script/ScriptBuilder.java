@@ -241,10 +241,10 @@ public class ScriptBuilder {
     }
 
     /** Creates a scriptPubKey that encodes term deposit to the given address. */
-    public static Script createTermDepositOutputScript(Address to, int releaseBlockNum) {
+    public static Script createTermDepositOutputScript(Address to, long releaseBlockNum) {
         // <releaseBlockNum> OP_CHECKLOCKTIMEVERIFY OP_DROP OP_DUP OP_HASH160 <pubKeyHash> OP_EQUALVERIFY OP_CHECKSIG
         return new ScriptBuilder()
-            .op(releaseBlockNum)
+            .number(releaseBlockNum)
             .op(OP_CHECKLOCKTIMEVERIFY)
             .op(OP_DROP)
             .op(OP_DUP)

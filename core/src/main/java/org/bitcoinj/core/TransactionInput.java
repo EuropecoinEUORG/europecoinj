@@ -40,12 +40,12 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * can be claimed by the recipient in the input of another transaction. You can imagine a
  * transaction as being a module which is wired up to others, the inputs of one have to be wired
  * to the outputs of another. The exceptions are coinbase transactions, which create new coins.</p>
- * 
+ *
  * <p>Instances of this class are not safe for use by multiple threads.</p>
  */
 public class TransactionInput extends ChildMessage {
-    /** Magic sequence number that indicates there is no sequence number. */
-    public static final long NO_SEQUENCE = 0xFFFFFFFFL;
+    /** Magic sequence number that is excpected as the right sequence number. */
+    public static final long NO_SEQUENCE = 0xFFFFFFFEL;
     private static final byte[] EMPTY_ARRAY = new byte[0];
     // Magic outpoint index that indicates the input is in fact unconnected.
     private static final long UNCONNECTED = 0xFFFFFFFFL;
@@ -213,7 +213,7 @@ public class TransactionInput extends ChildMessage {
     }
 
     /**
-     * @return The previous output transaction reference, as an OutPoint structure.  This contains the 
+     * @return The previous output transaction reference, as an OutPoint structure.  This contains the
      * data needed to connect to the output of the transaction we're gathering coins from.
      */
     public TransactionOutPoint getOutpoint() {

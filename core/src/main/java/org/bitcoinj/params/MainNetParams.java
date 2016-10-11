@@ -73,10 +73,25 @@ public class MainNetParams extends AbstractBitcoinNetParams {
         checkpoints.put(10176, Sha256Hash.wrap("000000eac0ce8e159aff91f656f6aa75af624246b69db7860bee21d3055e1cdd"));
         checkpoints.put(13104, Sha256Hash.wrap("000000727f3e125d4990effe146f749180419409a9a7388647139bb31a10368f"));
         checkpoints.put(14726, Sha256Hash.wrap("00000000028e2165069b61452056157febe10437c47667bf6631b99721e9d4d7"));
+        checkpoints.put(17348, Sha256Hash.wrap("00000961313d2fc22603f898ce53c351d859c829bd4c7a5566721459392183ba"));
+        checkpoints.put(23781, Sha256Hash.wrap("000000f174ed393cbffe587ad7c12b05491eb21135bb2a10888a5961a38919de"));
+        checkpoints.put(25252, Sha256Hash.wrap("000000fcf35b2a498f1b8e273f3b4c7009b604d1b19b6bbb8f9e1f512f267dca"));
 
         dnsSeeds = new String[] {
             "85.214.68.75",
-            "37.120.190",
+            "37.120.190.76",
+            "46.105.114.185",
+            "144.76.238.2",
+            "104.172.24.79",
+            "58.153.14.115",
+            "104.232.37.138",
+            "216.170.126.168",
+            "79.132.111.195",
+            "189.131.233.149",
+            "115.187.185.121",
+            "167.114.249.196",
+            "86.219.30.13",
+            "95.104.192.198",
         };
     }
 

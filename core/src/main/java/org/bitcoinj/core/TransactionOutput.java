@@ -186,7 +186,7 @@ public class TransactionOutput extends ChildMessage {
     }
 
     public Coin getValueWithInterest(int outputBlockHeight, int valuationHeight) {
-        return InterestRateTable.get().GetInterest(Coin.valueOf(value), outputBlockHeight, valuationHeight, scriptPubKey.GetTermDepositReleaseBlock());
+        return InterestRateTable.get().GetInterest(Coin.valueOf(value), outputBlockHeight, valuationHeight, scriptPubKey.getTermDepositReleaseBlock());
     }
 
     /**
@@ -330,8 +330,6 @@ public class TransactionOutput extends ChildMessage {
                 return transactionBag.isPubKeyMine(pubkey);
             } if (script.isPayToScriptHash()) {
                 return transactionBag.isPayToScriptHashMine(script.getPubKeyHash());
-            } if (script.IsTermDeposit()) {
-                return transactionBag.isPubKeyHashMine(script.GetTermDepositPubkeyHash());
             } else {
                 byte[] pubkeyHash = script.getPubKeyHash();
                 return transactionBag.isPubKeyHashMine(pubkeyHash);

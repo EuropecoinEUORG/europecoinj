@@ -51,6 +51,8 @@ public class DefaultCoinSelector implements CoinSelector {
             if (total >= target.value) break;
             // Only pick chain-included transactions, or transactions that are ours and pending.
             if (!shouldSelect(output.getParentTransaction())) continue;
+            // if output is still time locked, then don't count it
+            if (output.getScriptPubKey().getTermDepositReleaseBlock() > nHeight) continue;
             selected.add(output);
             int depthInMainChain = output.getParentTransaction().getConfidence().getDepthInBlocks();
             total += output.getValueWithInterest(nHeight + 1 - depthInMainChain, nHeight + 1).value;

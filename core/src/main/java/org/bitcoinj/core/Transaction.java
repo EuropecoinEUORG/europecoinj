@@ -56,7 +56,7 @@ import java.math.BigInteger;
  * Whether to trust a transaction is something that needs to be decided on a case by case basis - a rule that makes
  * sense for selling MP3s might not make sense for selling cars, or accepting payments from a family member. If you
  * are building a wallet, how to present confidence to your users is something to consider carefully.</p>
- * 
+ *
  * <p>Instances of this class are not safe for use by multiple threads.</p>
  */
 public class Transaction extends ChildMessage {
@@ -688,7 +688,7 @@ public class Transaction extends ChildMessage {
                 final TransactionOutput connectedOutput = outpoint.getConnectedOutput();
                 if (connectedOutput != null) {
                     Script scriptPubKey = connectedOutput.getScriptPubKey();
-                    if (scriptPubKey.isSentToAddress() || scriptPubKey.isPayToScriptHash()) {
+                    if (scriptPubKey.isSentToAddress() || scriptPubKey.isPayToScriptHash() || scriptPubKey.isTermDeposit()) {
                         s.append(" hash160:");
                         s.append(Utils.HEX.encode(scriptPubKey.getPubKeyHash()));
                     }
@@ -1330,6 +1330,17 @@ public class Transaction extends ChildMessage {
         for (TransactionInput input : getInputs())
             if (input.hasSequence())
                 return true;
+        return false;
+    }
+
+    /**
+     * Return true if tx is received and deposit locked
+     */
+    public boolean isDepositLocked(Wallet wallet) {
+        for (TransactionOutput output : getOutputs())
+            if (output.isMine(wallet) && output.getScriptPubKey().isTermDeposit())
+                return true;
+
         return false;
     }
 

@@ -57,7 +57,7 @@ public class PaymentProtocolTool {
                 session = new PaymentSession(request);
             } else if ("http".equals(uri.getScheme())) {
                 session = PaymentSession.createFromUrl(arg).get();
-            } else if ("bitcoin".equals(uri.getScheme())) {
+            } else if ("europecoin".equals(uri.getScheme())) {
                 BitcoinURI bcuri = new BitcoinURI(arg);
                 final String paymentRequestUrl = bcuri.getPaymentRequestUrl();
                 if (paymentRequestUrl == null) {

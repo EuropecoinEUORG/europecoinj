@@ -2902,13 +2902,8 @@ public class Wallet extends BaseTaggableObject
         List<Transaction> transactions = getTransactionsByTime();
         List<Transaction> result = new ArrayList<Transaction>();
         for (Transaction tx : transactions) {
-            for (TransactionOutput output : tx.getOutputs()) {
-                if (output.getScriptPubKey().IsTermDeposit()) {
-                    result.add(tx);
-                    break;
-                }
-            }
-
+            if (tx.isDepositLocked(this))
+                result.add(tx);
         }
         return result;
     }
@@ -3523,7 +3518,10 @@ public class Wallet extends BaseTaggableObject
             } else if (balanceType == BalanceType.ESTIMATED || balanceType == BalanceType.ESTIMATED_SPENDABLE) {
                 List<TransactionOutput> all = calculateAllSpendCandidates(false, balanceType == BalanceType.ESTIMATED_SPENDABLE);
                 Coin value = Coin.ZERO;
-                for (TransactionOutput out : all) value = value.add(out.getValue());
+                for (TransactionOutput out : all) {
+                    final int depthInMainChain = out.getParentTransaction().getConfidence().getDepthInBlocks();
+                    value = value.add(out.getValueWithInterest(lastBlockSeenHeight + 1 - depthInMainChain, lastBlockSeenHeight + 1));
+                }
                 return value;
             } else {
                 throw new AssertionError("Unknown balance type");  // Unreachable.
@@ -3782,6 +3780,8 @@ public class Wallet extends BaseTaggableObject
     public Transaction sendCoinsOffline(SendRequest request) throws InsufficientMoneyException {
         lock.lock();
         try {
+            // Set locktime to be the current block to ensure that CLTV (and term deposited) transactions are valid
+            request.tx.setLockTime(lastBlockSeenHeight);
             completeTx(request);
             commitTx(request.tx);
             return request.tx;
@@ -4173,7 +4173,7 @@ public class Wallet extends BaseTaggableObject
         } if (script.isPayToScriptHash()) {
             RedeemData data = findRedeemDataFromScriptHash(script.getPubKeyHash());
             return data != null && canSignFor(data.redeemScript);
-        } else if (script.isSentToAddress()) {
+        } else if (script.isSentToAddress() || script.isTermDeposit()) {
             ECKey key = findKeyFromPubHash(script.getPubKeyHash());
             return key != null && (key.isEncrypted() || key.hasPrivKey());
         } else if (script.isSentToMultiSig()) {
@@ -5027,7 +5027,7 @@ public class Wallet extends BaseTaggableObject
                 Script script = output.getScriptPubKey();
                 ECKey key = null;
                 Script redeemScript = null;
-                if (script.isSentToAddress()) {
+                if (script.isSentToAddress() || script.isTermDeposit()) {
                     key = findKeyFromPubHash(script.getPubKeyHash());
                     checkNotNull(key, "Coin selection includes unspendable outputs");
                 } else if (script.isPayToScriptHash()) {

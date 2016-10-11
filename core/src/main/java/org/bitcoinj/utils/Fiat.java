@@ -29,7 +29,7 @@ import com.google.common.primitives.Longs;
 /**
  * Represents a monetary fiat value. It was decided to not fold this into {@link org.bitcoinj.core.Coin} because of type
  * safety. Fiat values always come with an attached currency code.
- * 
+ *
  * This class is immutable.
  */
 public final class Fiat implements Monetary, Comparable<Fiat>, Serializable {
@@ -38,7 +38,7 @@ public final class Fiat implements Monetary, Comparable<Fiat>, Serializable {
      * The absolute value of exponent of the value of a "smallest unit" in scientific notation. We picked 4 rather than
      * 2, because in financial applications it's common to use sub-cent precision.
      */
-    public static final int SMALLEST_UNIT_EXPONENT = 4;
+    public static final int SMALLEST_UNIT_EXPONENT = 8;
 
     /**
      * The number of smallest units of this monetary value.
@@ -78,7 +78,7 @@ public final class Fiat implements Monetary, Comparable<Fiat>, Serializable {
      * <p/>
      * This takes string in a format understood by {@link BigDecimal#BigDecimal(String)}, for example "0", "1", "0.10",
      * "1.23E3", "1234.5E-5".
-     * 
+     *
      * @throws IllegalArgumentException
      *             if you try to specify fractional satoshis, or a value out of range.
      */

@@ -93,7 +93,7 @@ public class Transaction extends ChildMessage {
     public static final BigInteger LOCKTIME_THRESHOLD_BIG = BigInteger.valueOf(LOCKTIME_THRESHOLD);
 
     /** How many bytes a transaction can be before it won't be relayed anymore. Currently 100kb. */
-    public static final int MAX_STANDARD_TX_SIZE = 100000;
+    public static final int MAX_STANDARD_TX_SIZE = 250000;
 
     /**
      * If feePerKb is lower than this, Bitcoin Core will treat it as if there were no fee.

@@ -215,10 +215,10 @@ public class BuildCheckpoints {
         checkState(manager.numCheckpoints() == expectedSize);
 
         if (params.getId().equals(NetworkParameters.ID_MAINNET)) {
-            StoredBlock test = manager.getCheckpointBefore(1471169400);
-            checkState(test.getHeight() == 10000);
+            StoredBlock test = manager.getCheckpointBefore(1488307500);
+            checkState(test.getHeight() == 65064);
             checkState(test.getHeader().getHashAsString()
-                    .equals("0000004603d0c861f95bcb752fb447682d36923566b442522524359b77003bf4"));
+                    .equals("00000182c8c0c46a8f1f5964be756b68f43ba6290afaab8e51cfd510ecce4a17"));
         } else if (params.getId().equals(NetworkParameters.ID_TESTNET)) {
             StoredBlock test = manager.getCheckpointBefore(1390500000); // Thu Jan 23 19:00:00 CET 2014
             checkState(test.getHeight() == 167328);

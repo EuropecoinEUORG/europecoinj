@@ -139,7 +139,7 @@ public abstract class AbstractBitcoinNetParams extends NetworkParameters {
                 BlockReading = BlockReadingPrev;
             }
 
-          	//KGW Original
+            //KGW Original
             BigInteger kgw_dual1 = PastDifficultyAverage;
             BigInteger kgw_dual2 = storedPrev.getHeader().getDifficultyTargetAsInteger();
             if (PastRateActualSeconds != 0 && PastRateTargetSeconds != 0) {
@@ -155,11 +155,14 @@ public abstract class AbstractBitcoinNetParams extends NetworkParameters {
             }
 
             StoredBlock BlockPrev = storedPrev.getPrev(blockStore);
-          	long nActualTime1 = storedPrev.getHeader().getTimeSeconds() - BlockPrev.getHeader().getTimeSeconds();
+            long nActualTime1 = storedPrev.getHeader().getTimeSeconds() - BlockPrev.getHeader().getTimeSeconds();
 
             // hack caused bug in c implementation
             if (nActualTime1 < 0)
-                nActualTime1 = Blocktime * 3;
+                if (BlockReading.getHeight() > 60000)
+                    nActualTime1 = Blocktime;
+                else
+                    nActualTime1 = Blocktime * 3;
 
             long nActualTimespanshort = nActualTime1;
 
@@ -174,20 +177,20 @@ public abstract class AbstractBitcoinNetParams extends NetworkParameters {
             kgw_dual2 = kgw_dual2.divide(BigInteger.valueOf(Blocktime));
             kgw_dual2 = kgw_dual2.and(MASK256BIT);
 
-          	//Fusion from Retarget and Classic KGW3 (BitSend=)
-          	BigInteger newDifficulty = (kgw_dual2.add(kgw_dual1)).divide(BigInteger.valueOf(2));
+            //Fusion from Retarget and Classic KGW3 (BitSend=)
+            BigInteger newDifficulty = (kgw_dual2.add(kgw_dual1)).divide(BigInteger.valueOf(2));
 
-          	// DUAL KGW3 increased rapidly the Diff if Blocktime to last block under Blocktime/6 sec.
-          	if( nActualTimespanshort < Blocktime/6 ) {
-            		newDifficulty = newDifficulty.multiply(BigInteger.valueOf(85));
+            // DUAL KGW3 increased rapidly the Diff if Blocktime to last block under Blocktime/6 sec.
+            if( nActualTimespanshort < Blocktime/6 ) {
+                newDifficulty = newDifficulty.multiply(BigInteger.valueOf(85));
                 newDifficulty = newDifficulty.divide(BigInteger.valueOf(100));
-        		}
+            }
 
             //BitBreak BitSend
-          	// Reduce difficulty if current block generation time has already exceeded maximum time limit.
+            // Reduce difficulty if current block generation time has already exceeded maximum time limit.
             long nLongTimeLimit = 6 * 60 * 60;
-          	if ((nextBlock.getTimeSeconds() - storedPrev.getHeader().getTimeSeconds()) > nLongTimeLimit)
-          		  newDifficulty = bnPowLimit.divide(BigInteger.valueOf(15));
+            if ((nextBlock.getTimeSeconds() - storedPrev.getHeader().getTimeSeconds()) > nLongTimeLimit)
+                newDifficulty = bnPowLimit.divide(BigInteger.valueOf(15));
 
             if (newDifficulty.compareTo(bnPowLimit) > 0)
                 newDifficulty = bnPowLimit;

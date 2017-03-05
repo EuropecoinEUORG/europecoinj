@@ -519,7 +519,7 @@ public abstract class NetworkParameters {
     public abstract int getProtocolVersionNum(final ProtocolVersion version);
 
     public static enum ProtocolVersion {
-        MINIMUM(70002),
+        MINIMUM(70003),
         PONG(60001),
         BLOOM_FILTER(70000),
         CURRENT(70003);

@@ -71,16 +71,12 @@ public class MainNetParams extends AbstractBitcoinNetParams {
         checkpoints.put(3724,  Sha256Hash.wrap("000000561a9d683eb9e96e6aa0daeb796f09c3e6f734f88b745bb32d9b3ca84e"));
         checkpoints.put(7614,  Sha256Hash.wrap("0000004eb7ffab1324ac772ee5b70b86d32375c0ad309ed315283404f50a9a49"));
         checkpoints.put(10176, Sha256Hash.wrap("000000eac0ce8e159aff91f656f6aa75af624246b69db7860bee21d3055e1cdd"));
-        checkpoints.put(13104, Sha256Hash.wrap("000000727f3e125d4990effe146f749180419409a9a7388647139bb31a10368f"));
-        checkpoints.put(14726, Sha256Hash.wrap("00000000028e2165069b61452056157febe10437c47667bf6631b99721e9d4d7"));
-        checkpoints.put(17348, Sha256Hash.wrap("00000961313d2fc22603f898ce53c351d859c829bd4c7a5566721459392183ba"));
         checkpoints.put(23781, Sha256Hash.wrap("000000f174ed393cbffe587ad7c12b05491eb21135bb2a10888a5961a38919de"));
-        checkpoints.put(25252, Sha256Hash.wrap("000000fcf35b2a498f1b8e273f3b4c7009b604d1b19b6bbb8f9e1f512f267dca"));
-        checkpoints.put(34646, Sha256Hash.wrap("00001b2ffa0be77c83c88a324149ffaac504f80594ff187ffaaed5e1827f5fb6"));
         checkpoints.put(41818, Sha256Hash.wrap("0000043df25b1499b728d1e0cfdeb94ca0dc036ef6dbfad141f682d4901736ed"));
         checkpoints.put(50005, Sha256Hash.wrap("00000062ae859012a565dd8aaeb3455a1fe29784d5eb03e36712de51796e815a"));
-        checkpoints.put(58928, Sha256Hash.wrap("000001075535b3ddcb2fd19327109032723b7f999583338a5156d86c624a3c1b"));
         checkpoints.put(64864, Sha256Hash.wrap("0000006dea0a4f6f7ad4760e1e8aafad3ecfb770947643b1c22340c5f411879c"));
+        checkpoints.put(80808, Sha256Hash.wrap("0000009e31c926a82a374bcf0dc8d31489e961492765569f78f1935621708c3d"));
+        checkpoints.put(101280, Sha256Hash.wrap("000000557a5aec32e1efde78cd2309d54893bc793bb94e776079a5209352b505"));
 
         dnsSeeds = new String[] {
             "85.214.68.75",
